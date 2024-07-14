@@ -2,6 +2,7 @@
 
 const fsp = require('node:fs').promises;
 const path = require('node:path');
+const { port, statics } = require('./config');
 const server = require('./ws.js');
 const staticServer = require('./static.js');
 const load = require('./load.js');
@@ -25,7 +26,6 @@ const routing = {};
     const serviceName = path.basename(fileName, '.js');
     routing[serviceName] = await load(filePath, sandbox);
   }
-
-  staticServer('./static', 8000);
-  server(routing, 8001);
+  staticServer(statics.root, statics.port);
+  server(routing, port);
 })();
