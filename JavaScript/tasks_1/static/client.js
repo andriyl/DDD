@@ -1,6 +1,7 @@
 'use strict';
 
-const socket = new WebSocket('ws://127.0.0.1:8001/');
+const API_ADDRESS = '127.0.0.1:8001';
+const socket = new WebSocket(`ws://${API_ADDRESS}/`);
 
 const scaffold = (structure) => {
   const api = {};
