@@ -1,7 +1,7 @@
 'use strict';
 
-const console = require('./logger.js');
 const { Server } = require('ws');
+const console = require('../logger.js');
 
 module.exports = (routing, port) => {
   const ws = new Server({ port });

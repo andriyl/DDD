@@ -2,8 +2,8 @@
 
 const fsp = require('node:fs').promises;
 const path = require('node:path');
-const { port, statics } = require('./config');
-const server = require('./ws.js');
+const { port, statics, transport } = require('./config');
+const server = require(`./transports/${transport}.js`);
 const staticServer = require('./static.js');
 const load = require('./load.js');
 const db = require('./db.js');
