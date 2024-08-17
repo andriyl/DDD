@@ -11,7 +11,7 @@ const transport = {
         socket.send(JSON.stringify(packet));
         socket.onmessage = event => {
           const data = JSON.parse(event.data);
-          resolve({ data, target: event });
+          resolve({ data, target: socket });
         };
       });
       socket.addEventListener('error', reject);
@@ -70,13 +70,10 @@ const schema = {
     delete: { params: ['id'] },
   }
 }
+
 const api = scaffold(schema, transport[protocol]);
 
 (async () => {
   const { data } = await api.user.read(3);
   console.dir({ data });
 })();
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { schema, api };
-}
