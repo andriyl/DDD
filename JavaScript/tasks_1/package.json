@@ -11,5 +11,10 @@
   "dependencies": {
     "pg": "^8.8.0",
     "ws": "^8.12.0"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "test:ws": "node --test tests/cases/ws.test.js",
+    "test:http": "node --test tests/cases/http.test.js"
   }
 }

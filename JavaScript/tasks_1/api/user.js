@@ -18,7 +18,7 @@
   },
 
   async find(mask) {
-    const sql = 'SELECT login from users where login like $1';
+    const sql = 'SELECT id, login from users where login like $1';
     return await db('users').query(sql, [mask]);
   },
 });
