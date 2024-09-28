@@ -1,10 +1,8 @@
 'use strict';
 
-const protocol = 'ws'; // ws, http
-const API_ADDRESS = '127.0.0.1:8001';
 const transport = {
-  ws: (name, method) => (...args) => {
-    const socket = new WebSocket(`ws://${API_ADDRESS}/`);
+  ws: (url, name, method) => (...args) => {
+    const socket = new WebSocket(url);
     const packet = { name, method, args };
     return new Promise((resolve, reject) => {
       socket.addEventListener('open', () => {
@@ -17,11 +15,11 @@ const transport = {
       socket.addEventListener('error', reject);
     });
   },
-  http: (name, method, service) => async (...args) => {
+  http: (url, name, method, service) => async (...args) => {
     const { params, body } = service[method];
     const urlPath = params ? `/${args[0]}` : '';
     const record = body ? args[Number(!!params)] : null;
-    const reqUrl = `http://${API_ADDRESS}/${name}/${method}${urlPath}`;
+    const reqUrl = `${url}/${name}/${method}${urlPath}`;
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
@@ -35,15 +33,17 @@ const transport = {
   }
 }
 
-const scaffold = (structure, transport) => {
+const scaffold = (url, structure) => {
+  const protocol = url.startsWith('ws:') ? 'ws' : 'http'
   const api = {};
   const services = Object.keys(structure);
   for (const serviceName of services) {
     api[serviceName] = {};
     const service = structure[serviceName];
     const methods = Object.keys(service);
+    const trFn = transport[protocol];
     for (const method of methods) {
-      api[serviceName][method] = transport(serviceName, method, service);
+      api[serviceName][method] = trFn(url, serviceName, method, service);
     }
   }
   return api;
@@ -71,7 +71,9 @@ const schema = {
   }
 }
 
-const api = scaffold(schema, transport[protocol]);
+const protocol = 'http';
+const url = `${protocol}://127.0.0.1:8001`;
+const api = scaffold(url, schema);
 
 (async () => {
   const { data } = await api.user.read(3);

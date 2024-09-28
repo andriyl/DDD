@@ -1,4 +1,4 @@
-const { getRandomEntity } = require('./utils');
+const { getRandomEntity } = require('../utils');
 const payloads = {
   user: {
     login: getRandomEntity('user_'),

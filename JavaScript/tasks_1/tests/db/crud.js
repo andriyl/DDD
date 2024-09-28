@@ -1,4 +1,4 @@
-const { getPayloadMask } = require('./utils');
+const { getPayloadMask } = require('../utils');
 const operations = {
   create: (api, payload) => api.create(payload),
   async read(api, payload) {

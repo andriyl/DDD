@@ -14,7 +14,6 @@
   },
   "scripts": {
     "start": "node main.js",
-    "test:ws": "node --test tests/cases/ws.test.js",
-    "test:http": "node --test tests/cases/http.test.js"
+    "test": "node --test tests/index.js"
   }
 }
