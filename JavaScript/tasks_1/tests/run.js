@@ -2,14 +2,15 @@ const path = require('node:path');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const WebSocket = require('ws');
-const { describe } = require('node:test');
-const { operations } = require('./crud');
-const { payloads } = require('./payloads');
+const { operations } = require('./db/crud');
+const { payloads } = require('./db/payloads');
 const { host, port, transport } = require('../config');
 
 async function getClientApiSchema() {
   const filePath = path.join(__dirname, '../static/client.js');
-  const src = await fs.promises.readFile(filePath, 'utf8');
+  const src = (await fs.promises.readFile(filePath, 'utf8'))
+    .replace(/(const protocol = ')(.*?)(';)/, `$1${transport}$3`);
+
   const code = `(function() {${src} return { api, schema }})()`;
   const context = vm.createContext({
     __filename: filePath,
@@ -22,7 +23,7 @@ async function getClientApiSchema() {
 }
 
 async function isWSReady() {
-   return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const socket = new WebSocket(`ws://${host}:${port}`);
     const message = `Connection server error - state: ${socket.readyState}, please run server and try again\n`
     socket.once('error', () => reject(message));
@@ -56,16 +57,17 @@ function isServerRunning() {
   return server[transport]();
 }
 
-async function runTests(tests) {
-  const server = await isServerRunning().catch(console.log)
-  if (!server) return
+async function runTests(tests, top) {
+  const server = await isServerRunning().catch(console.error);
+  if (!server) return;
   const { api, schema } = await getClientApiSchema();
   for (const [entity, apiMethods] of Object.entries(api)) {
-    describe(`${entity} CRUD`, () => {
+    await top.test(`${entity} CRUD`, async (t) => {
       for (const [operation] of Object.entries(schema[entity])) {
+        const opFn = operations[operation];
         if (tests[operation]) {
-          const apiOperation = () => operations[operation](apiMethods, payloads[entity]);
-          tests[operation](apiOperation);
+          const apiOperation = await opFn(apiMethods, payloads[entity]);
+          await tests[operation](apiOperation, t);
         }
       }
     });
